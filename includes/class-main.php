@@ -56,6 +56,9 @@ class Main {
 		$settings = new AdminSettings();
 		// And check the latest default options are set.
 		$settings->update_default_options();
+
+		// Set up the post types.
+		PostTypes::setup_post_types();
 	}
 
 	/**

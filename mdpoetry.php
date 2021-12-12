@@ -3,7 +3,7 @@
 Plugin Name: MartianDaze Poetry
 Plugin URI:  https://martiandaze.net
 Description: A poetry store for semi-private use
-Version:     0.0.4
+Version:     0.0.5
 Author:      Eleanor Martin
 Author URI:  https://martiandaze.net/about
 
@@ -17,11 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Define the plugin file location.
 if ( ! defined( 'MDP_PLUGIN_FILE' ) ) {
 	define( 'MDP_PLUGIN_FILE', __FILE__ );
-}
-
-// Define the translation domain.
-if ( ! defined( 'MDP_TRANSLATE_DOMAIN' ) ) {
-	define( 'MDP_TRANSLATE_DOMAIN', 'plugin-template' );
 }
 
 // Include the main plugin class.
@@ -53,7 +48,7 @@ function mdp_activate_plugin() {
 	foreach ( $module_dependencies as $classname => $title ) {
 		if ( ! class_exists( $classname ) ) {
 			deactivate_plugins( plugin_basename( __FILE__ ) );
-			wp_die( sprintf( __( 'Please install and activate %s.', MDP_TRANSLATE_DOMAIN ), $title ) ); //phpcs:ignore
+			wp_die( sprintf( __( 'Please install and activate %s.', 'mdpoetry-plugin' ), $title ) ); //phpcs:ignore
 		}
 	}
 }
