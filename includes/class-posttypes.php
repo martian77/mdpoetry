@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class PostTypes {
 
 	public const POST_TYPE_POEM = 'md_poem';
+	public const POST_TYPE_POET = 'md_poet';
+	public const TAXONOMY_POEM_TAGS = 'poem_tags';
 
 	/**
 	 * Runs the setup
@@ -38,22 +40,27 @@ class PostTypes {
 	private function add_post_types() {
 		$poem = array(
 			'labels' => array(
-				'name' => __( 'Poems', 'mdpoetry-plugin' ),
+				'name'          => __( 'Poems', 'mdpoetry-plugin' ),
 				'singular_name' => __( 'Poem', 'mdpoetry-plugin' ),
 			),
-			'public' => true,
-			'has_archive' => true,
+			'public'       => true,
+			'has_archive'  => true,
+			'show_in_rest' => true,
+			'supports'     => array( 'title', 'editor', 'author' ),
 		);
 		register_post_type( self::POST_TYPE_POEM, $poem );
+
 		$poet = array(
 			'labels' => array(
-				'name' => __( 'Poets', 'mdpoetry-plugin' ),
+				'name'          => __( 'Poets', 'mdpoetry-plugin' ),
 				'singular_name' => __( 'Poet', 'mdpoetry-plugin' ),
 			),
-			'public' => true,
-			'has_archive' => true,
+			'public'       => true,
+			'has_archive'  => true,
+			'show_in_rest' => true,
+			'supports'     => array( 'title', 'editor', 'author', 'thumbnail' ),
 		);
-		register_post_type( 'md_poet', $poet );
+		register_post_type( self::POST_TYPE_POET, $poet );
 	}
 
 	/**
@@ -76,9 +83,10 @@ class PostTypes {
 			'labels'            => $labels,
 			'show_ui'           => true,
 			'show_admin_column' => true,
+			'show_in_rest'      => true,
 			'query_var'         => true,
 		);
-		register_taxonomy( 'poem_tags', array( 'md_poem' ), $args );
+		register_taxonomy( self::TAXONOMY_POEM_TAGS, array( self::POST_TYPE_POEM ), $args );
 	}
 
 	/**
@@ -87,5 +95,6 @@ class PostTypes {
 	public static function setup_post_types() {
 		$posttype = new PostTypes();
 		$posttype->run_setup();
+		add_theme_support( 'post-thumbnails' );
 	}
 }
