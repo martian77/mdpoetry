@@ -194,7 +194,7 @@ class AdminSettings {
 	 * @return bool  True if update successful, false otherwise.
 	 */
 	public function update_default_options() {
-		$options = get_option( $this->setting_name, array() );
+		$options = get_option( $this->settings_name, array() );
 		$settings = $this->settings;
 		foreach ( $settings as $section_name => $section ) {
 			foreach ( $section['settings'] as $setting_name => $setting ) {
@@ -204,7 +204,7 @@ class AdminSettings {
 				}
 			}
 		}
-		return update_option( $this->setting_name, $options );
+		return update_option( $this->settings_name, $options );
 	}
 
 	/**
