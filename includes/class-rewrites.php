@@ -34,10 +34,15 @@ class Rewrites {
 
 	/**
 	 * Wires up hooks.
+	 *
+	 * Called from Main::init() which itself runs on the `init` action, so
+	 * add_rewrite_rule() is called directly here (no nested init hook). This
+	 * ensures the rules are present in the rewrite array before the version-
+	 * stamped flush runs further down in Main::init().
 	 */
 	public static function setup() {
 		$self = new self();
-		add_action( 'init', array( $self, 'add_rewrite_rules' ) );
+		$self->add_rewrite_rules();
 		add_filter( 'query_vars', array( $self, 'register_query_vars' ) );
 		add_filter( 'post_type_link', array( $self, 'filter_permalink' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $self, 'pre_get_posts' ) );
