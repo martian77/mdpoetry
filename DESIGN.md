@@ -76,3 +76,4 @@ The following are *not* decided. "We chose not to decide yet" is itself the curr
 - **Repeatable meta field UI** for `external_links`: custom code vs. ACF/Meta Box/CMB2. Decide at implementation time.
 - **Discovery / homepage.** What should someone landing on the plugin's root URL see? Not designed.
 - **Public archive and search.** Defaults for now. Revisit when the collection is large enough that defaults stop being useful.
+- **Chapbook builder.** User-assembled lists of poems with a page-limit constraint, rendered through a printable template that folds into a zine (canonical layout: 8-page A4 imposition, but worth exploring others). Considerations to settle at implementation time: whether lists are private or shareable; how to surface public-domain vs in-copyright status per poem so the user knows what's safe to include (UK rule: author died ≤ 1955 → public domain).
