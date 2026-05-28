@@ -85,6 +85,9 @@ class Poem extends BaseObject {
 			return '';
 		}
 		$text  = preg_replace( '/<!--.*?-->/s', '', $content );
+		// The Poetry/Verse block stores line breaks as <br> tags inside a <pre>.
+		// Convert them to newlines before stripping HTML so each line survives.
+		$text  = preg_replace( '#<br\s*/?>#i', "\n", $text );
 		$text  = wp_strip_all_tags( $text );
 		$text  = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
 		$lines = preg_split( '/\r\n|\r|\n/', $text );

@@ -65,6 +65,8 @@ Both CPTs opt into the block editor via `show_in_rest => true` on `register_post
 
 Meta fields (`poet_id`, `source`, `external_links`) are edited via **classic PHP meta boxes**, which render correctly inside Gutenberg without a JS toolchain.
 
+**Poem bodies should use the core Poetry block** (slug: `core/verse`, CSS class `wp-block-verse` — the inserter label was renamed from "Verse" to "Poetry"). One block per stanza. It preserves line breaks and whitespace, which the default Paragraph block does not — Enter inside a Paragraph starts a new block, not a new line. `Poem::compute_excerpt()` handles the block markup correctly: the first line of the first stanza becomes the excerpt.
+
 Future direction: replace meta boxes with React-based Gutenberg sidebar panels (`PluginDocumentSettingPanel`), which requires registering meta with `show_in_rest` and adding a JS build. Not blocking — pursue when a richer meta UX is wanted.
 
 ## Deliberately deferred
