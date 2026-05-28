@@ -55,17 +55,46 @@ class Poem extends BaseObject {
 	}
 
 	/**
-	 * Excerpt getter
+	 * Excerpt getter.
+	 *
+	 * Returns the first non-empty line of the poem body, stripping Gutenberg
+	 * block comment markers and HTML tags before splitting on newlines.
 	 *
 	 * @return string
 	 */
 	public function get_excerpt() {
-		// Want to return just the first line.
-		if ( empty( $this->excerpt ) ) {
-			$text = explode( '<br>', $this->poem );
-			parent::set_excerpt( $text[0] );
+		$existing = parent::get_excerpt();
+		if ( empty( $existing ) && ! empty( $this->poem ) ) {
+			parent::set_excerpt( self::compute_excerpt( $this->poem ) );
 		}
 		return parent::get_excerpt();
+	}
+
+	/**
+	 * Computes the first-line excerpt from poem body content.
+	 *
+	 * Strips block comment markers (e.g. `<!-- wp:paragraph -->`) and any
+	 * remaining HTML tags, then splits on newlines and returns the first
+	 * non-empty line.
+	 *
+	 * @param  string $content Raw poem body.
+	 * @return string          First non-empty line, or empty string.
+	 */
+	public static function compute_excerpt( $content ) {
+		if ( ! is_string( $content ) || '' === $content ) {
+			return '';
+		}
+		$text  = preg_replace( '/<!--.*?-->/s', '', $content );
+		$text  = wp_strip_all_tags( $text );
+		$text  = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
+		$lines = preg_split( '/\r\n|\r|\n/', $text );
+		foreach ( $lines as $line ) {
+			$line = trim( $line );
+			if ( '' !== $line ) {
+				return $line;
+			}
+		}
+		return '';
 	}
 
 	/**

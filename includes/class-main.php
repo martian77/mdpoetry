@@ -10,6 +10,9 @@
 namespace MDPoetry;
 
 use MDPoetry\Admin\AdminSettings;
+use MDPoetry\Poems\PoemMetaBoxes;
+use MDPoetry\Poems\PoemVisibility;
+use MDPoetry\Poets\PoetMetaBoxes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -59,6 +62,16 @@ class Main {
 
 		// Set up the post types.
 		PostTypes::setup_post_types();
+
+		// Meta boxes for the editor screens.
+		PoemMetaBoxes::setup();
+		PoetMetaBoxes::setup();
+
+		// Copyright-safe visibility filter on poem content.
+		PoemVisibility::setup();
+
+		// Plugin-provided single templates (theme can still override).
+		Templates::setup();
 	}
 
 	/**
