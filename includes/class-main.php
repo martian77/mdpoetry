@@ -104,7 +104,7 @@ class Main {
 		$this->define( 'MDP_PLUGIN_SHORTNAME', 'mdpoetry' );
 		$this->define( 'MDP_ABSPATH', dirname( MDP_PLUGIN_FILE ) . '/' );
 		$this->define( 'MDP_TEMPLATE_PATH', 'md-poetry' );
-		$this->define( 'MDP_VERSION', '0.0.7.1' );
+		$this->define( 'MDP_VERSION', '0.0.7.2' );
 	}
 
 	/**

@@ -45,8 +45,10 @@ class Rewrites {
 		$self->add_rewrite_rules();
 		add_filter( 'query_vars', array( $self, 'register_query_vars' ) );
 		add_filter( 'post_type_link', array( $self, 'filter_permalink' ), 10, 2 );
+		add_filter( 'redirect_canonical', array( $self, 'suppress_canonical_for_namespaced' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $self, 'pre_get_posts' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_shortcut' ) );
+		add_action( 'template_redirect', array( $self, 'redirect_singular_poet_to_archive' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_legacy_singles' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_legacy_archive' ) );
 	}
@@ -142,6 +144,34 @@ class Rewrites {
 	}
 
 	/**
+	 * Redirects /u/{id}/poet/ (no slug) to /u/{id}/poets/.
+	 */
+	public function redirect_singular_poet_to_archive() {
+		if ( preg_match( '#/u/(\d+)/poet/?$#', self::current_url(), $matches ) ) {
+			wp_safe_redirect( home_url( sprintf( '/u/%d/poets/', (int) $matches[1] ) ), 301 );
+			exit;
+		}
+	}
+
+	/**
+	 * Prevents WP's redirect_canonical from redirecting namespaced URLs.
+	 *
+	 * Without this, WP calls get_permalink() on the found post (which returns
+	 * the real author's namespaced URL via filter_permalink) and redirects —
+	 * turning a wrong-user-ID 404 into a silent redirect to the real author.
+	 *
+	 * @param  string $redirect_url  The canonical URL WP wants to redirect to.
+	 * @param  string $requested_url The current request URL.
+	 * @return string|false
+	 */
+	public function suppress_canonical_for_namespaced( $redirect_url, $requested_url ) {
+		if ( preg_match( '#/u/\d+/#', $requested_url ) ) {
+			return false;
+		}
+		return $redirect_url;
+	}
+
+	/**
 	 * /poets/ shortcut: redirects to /u/{viewer-id}/poets/.
 	 *
 	 * - Logged-in user -> their own namespace.
@@ -175,6 +205,16 @@ class Rewrites {
 			return;
 		}
 		if ( (int) get_query_var( self::QV_USER_ID ) > 0 ) {
+			return;
+		}
+		// URL already looks namespaced (/u/{id}/...) but our query var wasn't set,
+		// meaning WP resolved it via its own default rule. Don't redirect to the
+		// real author — that would expose cross-user slugs. 404 instead.
+		if ( preg_match( '#/u/\d+/#', self::current_url() ) ) {
+			global $wp_query;
+			$wp_query->set_404();
+			status_header( 404 );
+			nocache_headers();
 			return;
 		}
 		$post = get_post();
