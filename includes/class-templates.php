@@ -108,33 +108,4 @@ class Templates {
 
 		return null;
 	}
-
-	/**
-	 * Renders the page header for a plugin template, including the active
-	 * theme's chrome.
-	 *
-	 * On a block theme, get_header() only emits the document head and opening
-	 * body (theme-compat) — the visible header/nav chrome lives in the theme's
-	 * `header` template part, which classic PHP templates like ours don't pull
-	 * in automatically. We render it explicitly so our templates still get the
-	 * theme's header. On a classic theme get_header() already emits the chrome,
-	 * so block_header_area() finds no part and is a no-op.
-	 */
-	public static function render_header() {
-		get_header();
-		if ( wp_is_block_theme() && function_exists( 'block_header_area' ) ) {
-			block_header_area();
-		}
-	}
-
-	/**
-	 * Renders the page footer for a plugin template, including the active
-	 * theme's chrome. Mirror of render_header(); see its docblock.
-	 */
-	public static function render_footer() {
-		if ( wp_is_block_theme() && function_exists( 'block_footer_area' ) ) {
-			block_footer_area();
-		}
-		get_footer();
-	}
 }

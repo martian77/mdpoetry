@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-\MDPoetry\Templates::render_header();
+get_header();
 ?>
 
 <main id="primary" class="site-main mdp-single-poet">
@@ -179,4 +179,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 </main>
 
 <?php
-\MDPoetry\Templates::render_footer();
+get_footer();
