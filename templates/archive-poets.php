@@ -50,7 +50,7 @@ $poets = get_posts(
 
 $is_own_index = ( get_current_user_id() === $user_id );
 
-get_header();
+\MDPoetry\Templates::render_header();
 ?>
 
 <main id="primary" class="site-main mdp-poets-archive">
@@ -122,4 +122,4 @@ get_header();
 </main>
 
 <?php
-get_footer();
+\MDPoetry\Templates::render_footer();
