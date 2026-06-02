@@ -3,10 +3,10 @@
  * MDPoetry: Decorates single-poet content with the plugin's bespoke markup.
  *
  * The single poet page renders through the active theme's own template (so it
- * inherits the theme's chrome and layout). This filter injects the photo,
- * external links, the poet's poem list, aggregated tag counts, and a back-link
- * into `the_content`, guarded to the front-end singular view so it never leaks
- * into feeds, the REST API, the editor, or archive loops.
+ * inherits the theme's chrome and layout, including the featured-image photo).
+ * This filter injects the external links, the poet's poem list, aggregated tag
+ * counts, and a back-link into `the_content`, guarded to the front-end singular
+ * view so it never leaks into feeds, the REST API, the editor, or archive loops.
  *
  * @package MDPoetry
  */
@@ -50,20 +50,9 @@ class PoetContent {
 		if ( ! $post ) {
 			return $content;
 		}
-		return self::photo( $post ) . $content . self::sections( $post );
-	}
-
-	/**
-	 * Renders the poet's featured-image photo, if set.
-	 *
-	 * @param  \WP_Post $post The poet.
-	 * @return string
-	 */
-	private static function photo( $post ) {
-		if ( ! has_post_thumbnail( $post ) ) {
-			return '';
-		}
-		return '<div class="mdp-poet__photo">' . get_the_post_thumbnail( $post, 'medium' ) . '</div>';
+		// The featured-image photo is left to the theme's single template, which
+		// renders it already; injecting it here would duplicate it.
+		return $content . self::sections( $post );
 	}
 
 	/**

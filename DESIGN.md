@@ -83,7 +83,7 @@ Future direction: replace meta boxes with React-based Gutenberg sidebar panels (
 
 The plugin's bespoke markup is injected into `the_content` instead:
 - `Poems\PoemContent` prepends the byline and appends tags, the author-only notice, and the back-link.
-- `Poets\PoetContent` prepends the photo and appends external links, the poem list, aggregated tag counts, and the back-link.
+- `Poets\PoetContent` appends external links, the poem list, aggregated tag counts, and the back-link. (The featured-image photo is left to the theme's single template, which already renders it.)
 
 Both run at `the_content` priority 30 (after `PoemVisibility` at 20, so the body is already the author-or-public version) and are guarded to `is_singular() && in_the_loop() && is_main_query()` — so the markup never leaks into feeds, the REST API, the block editor, or archive loops.
 
