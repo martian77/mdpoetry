@@ -32,6 +32,35 @@ class PoemVisibility {
 	public static function setup() {
 		$self = new self();
 		add_filter( 'the_content', array( $self, 'filter_content' ), 20 );
+		add_filter( 'posts_where', array( $self, 'filter_search_where' ), 10, 2 );
+	}
+
+	/**
+	 * Keeps poems you don't own out of front-end search results.
+	 *
+	 * `md_poem` is a public post type, so by default a non-author searching a
+	 * word that only appears in a hidden line would surface the poem — the body
+	 * isn't shown, but the match leaks that the content exists, undercutting the
+	 * "first line + source only" promise. We exclude `md_poem` rows not authored
+	 * by the current viewer (so your own poems stay findable when logged in)
+	 * rather than using the blunt `exclude_from_search`, which would hide them
+	 * from the author too. Other post types are untouched.
+	 *
+	 * @param  string    $where The WHERE clause of the query.
+	 * @param  \WP_Query $query The query being run.
+	 * @return string
+	 */
+	public function filter_search_where( $where, $query ) {
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+			return $where;
+		}
+		global $wpdb;
+		$where .= $wpdb->prepare(
+			" AND NOT ( {$wpdb->posts}.post_type = %s AND {$wpdb->posts}.post_author <> %d )",
+			PostTypes::POST_TYPE_POEM,
+			get_current_user_id()
+		);
+		return $where;
 	}
 
 	/**
