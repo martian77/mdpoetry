@@ -50,6 +50,7 @@ class Rewrites {
 		add_filter( 'post_type_link', array( $self, 'filter_permalink' ), 10, 2 );
 		add_filter( 'redirect_canonical', array( $self, 'suppress_canonical_for_namespaced' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $self, 'pre_get_posts' ) );
+		add_action( 'template_redirect', array( $self, 'maybe_404_unknown_user' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_shortcut' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_singular_poet_to_archive' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_legacy_singles' ) );
@@ -184,6 +185,31 @@ class Rewrites {
 			return false;
 		}
 		return $redirect_url;
+	}
+
+	/**
+	 * 404s an archive request for a user-id that doesn't exist.
+	 *
+	 * Runs on template_redirect (after the main query and core's own
+	 * handle_404), so the flag survives, and before template selection — which
+	 * means WordPress then resolves its normal 404 template, whether the active
+	 * theme is classic (404.php) or block (404 HTML template). The archive
+	 * templates must not render their own 404, since that only works for classic
+	 * themes.
+	 */
+	public function maybe_404_unknown_user() {
+		$archive = get_query_var( self::QV_ARCHIVE );
+		if ( self::ARCHIVE_POETS !== $archive && self::ARCHIVE_POEMS !== $archive ) {
+			return;
+		}
+		$user_id = (int) get_query_var( self::QV_USER_ID );
+		if ( $user_id <= 0 || get_user_by( 'ID', $user_id ) ) {
+			return;
+		}
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
 	}
 
 	/**

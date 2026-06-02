@@ -61,6 +61,11 @@ class Templates {
 	 * @return string
 	 */
 	public static function filter_template_include( $template ) {
+		// An unknown user-id is flagged 404 upstream (Rewrites::maybe_404_unknown_user).
+		// Leave core's resolved 404 template in place rather than forcing our archive.
+		if ( is_404() ) {
+			return $template;
+		}
 		if ( (int) get_query_var( Rewrites::QV_USER_ID ) > 0 ) {
 			$archive = get_query_var( Rewrites::QV_ARCHIVE );
 			$file    = null;
