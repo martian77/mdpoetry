@@ -20,6 +20,8 @@ get_header();
 ?>
 
 <main id="primary" class="site-main mdp-single-poet">
+	<?php // Constrained-layout group so block themes apply their content width + centering. ?>
+	<div class="wp-block-group is-layout-constrained">
 	<?php
 	while ( have_posts() ) :
 		the_post();
@@ -173,6 +175,7 @@ get_header();
 		<?php
 	endwhile;
 	?>
+	</div>
 </main>
 
 <?php

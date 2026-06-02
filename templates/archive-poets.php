@@ -54,6 +54,8 @@ get_header();
 ?>
 
 <main id="primary" class="site-main mdp-poets-archive">
+	<?php // Constrained-layout group so block themes apply their content width + centering. ?>
+	<div class="wp-block-group is-layout-constrained">
 	<header class="mdp-poets-archive__header">
 		<h1><?php esc_html_e( 'Poets', 'mdpoetry-plugin' ); ?></h1>
 		<?php if ( ! $is_own_index ) : ?>
@@ -116,6 +118,7 @@ get_header();
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
+	</div>
 </main>
 
 <?php
