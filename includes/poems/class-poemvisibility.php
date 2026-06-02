@@ -69,12 +69,25 @@ class PoemVisibility {
 	 * @return string HTML.
 	 */
 	public static function render_public_view( $post ) {
-		$excerpt = Poem::compute_excerpt( $post->post_content );
-		$source  = (string) get_post_meta( $post->ID, PoemMetaBoxes::META_SOURCE, true );
+		$excerpt    = Poem::compute_excerpt( $post->post_content );
+		$total      = Poem::count_lines( $post->post_content );
+		$more_lines = max( 0, $total - 1 );
+		$source     = (string) get_post_meta( $post->ID, PoemMetaBoxes::META_SOURCE, true );
 
 		$html  = '<div class="mdp-poem-public">';
 		if ( '' !== $excerpt ) {
 			$html .= '<p class="mdp-poem-first-line">' . esc_html( $excerpt ) . '…</p>';
+			if ( $more_lines > 0 ) {
+				$html .= '<p class="mdp-poem-more-lines">'
+					. esc_html(
+						sprintf(
+							/* translators: %d: number of remaining lines hidden from non-authors */
+							_n( '(%d more line…)', '(%d more lines…)', $more_lines, 'mdpoetry-plugin' ),
+							$more_lines
+						)
+					)
+					. '</p>';
+			}
 		}
 		if ( '' !== $source ) {
 			$html .= '<p class="mdp-poem-source"><em>'

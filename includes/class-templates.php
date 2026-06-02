@@ -1,6 +1,6 @@
 <?php
 /**
- * MDPoetry: Routes single-CPT templates to plugin-provided defaults.
+ * MDPoetry: Routes single-CPT and custom-archive templates to plugin defaults.
  *
  * @package MDPoetry
  */
@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Single-template loader for `md_poem` and `md_poet`.
+ * Template loader for `md_poem`, `md_poet`, and the namespaced poets archive.
  *
- * Themes can still override by providing `single-md_poem.php` or
- * `single-md_poet.php` in the theme (or under `md-poetry/` in the theme).
+ * Themes can still override by providing the same filename in the theme root
+ * or under the `md-poetry/` subfolder of the theme.
  *
  * @category class
  * @since 0.0.6
@@ -24,10 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Templates {
 
 	/**
-	 * Wires up the template filter.
+	 * Wires up the template filters.
 	 */
 	public static function setup() {
 		add_filter( 'single_template', array( self::class, 'filter_single_template' ) );
+		add_filter( 'template_include', array( self::class, 'filter_template_include' ) );
 	}
 
 	/**
@@ -48,9 +49,35 @@ class Templates {
 			return $template;
 		}
 
-		$filename = 'single-' . $type . '.php';
+		$located = self::locate( 'single-' . $type . '.php' );
+		return $located ? $located : $template;
+	}
 
-		// Check theme overrides first.
+	/**
+	 * Routes custom routes (currently the namespaced poets archive) to their
+	 * template.
+	 *
+	 * @param  string $template Template path chosen by core.
+	 * @return string
+	 */
+	public static function filter_template_include( $template ) {
+		if ( Rewrites::ARCHIVE_POETS === get_query_var( Rewrites::QV_ARCHIVE )
+			&& (int) get_query_var( Rewrites::QV_USER_ID ) > 0 ) {
+			$located = self::locate( 'archive-poets.php' );
+			if ( $located ) {
+				return $located;
+			}
+		}
+		return $template;
+	}
+
+	/**
+	 * Locates a template, preferring a theme override over the plugin default.
+	 *
+	 * @param  string $filename Bare template filename.
+	 * @return string|null      Absolute path, or null if not found.
+	 */
+	private static function locate( $filename ) {
 		$theme_template = locate_template(
 			array(
 				trailingslashit( MDP_TEMPLATE_PATH ) . $filename,
@@ -61,12 +88,11 @@ class Templates {
 			return $theme_template;
 		}
 
-		// Fall back to the plugin's own template.
 		$plugin_template = MDP_ABSPATH . 'templates/' . $filename;
 		if ( file_exists( $plugin_template ) ) {
 			return $plugin_template;
 		}
 
-		return $template;
+		return null;
 	}
 }

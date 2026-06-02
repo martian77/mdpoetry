@@ -45,7 +45,7 @@ class PoemMetaBoxes {
 			__( 'Poem Details', 'mdpoetry-plugin' ),
 			array( $this, 'render' ),
 			PostTypes::POST_TYPE_POEM,
-			'side',
+			'normal',
 			'default'
 		);
 	}
