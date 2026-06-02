@@ -70,6 +70,11 @@ get_header();
 				?>
 			</p>
 		<?php endif; ?>
+		<p class="mdp-poets-archive__nav">
+			<a href="<?php echo esc_url( home_url( sprintf( '/u/%d/poems/', $user_id ) ) ); ?>">
+				<?php esc_html_e( 'View poems →', 'mdpoetry-plugin' ); ?>
+			</a>
+		</p>
 	</header>
 
 	<?php if ( empty( $poets ) ) : ?>

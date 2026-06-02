@@ -63,6 +63,15 @@ get_header();
 						</small>
 					</p>
 				<?php endif; ?>
+
+				<?php $author_id = (int) get_post_field( 'post_author', $poem_id ); ?>
+				<?php if ( $author_id > 0 ) : ?>
+					<p class="mdp-poem__back">
+						<a href="<?php echo esc_url( home_url( sprintf( '/u/%d/poems/', $author_id ) ) ); ?>">
+							<?php esc_html_e( '← All poems', 'mdpoetry-plugin' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
 			</footer>
 		</article>
 		<?php

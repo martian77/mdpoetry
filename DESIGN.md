@@ -44,14 +44,20 @@ The excerpt must be derived from block-aware content: strip block-comment marker
 
 The author, when viewing their own poem, sees full body. Everyone else sees first line + source.
 
+**The poems index** (`/u/{user-id}/poems/`) lists titles linking to single-poem pages; the visibility filter still governs what's visible on each poem page, so non-authors get first line + source there as on poet pages. Single poem and poet pages each carry a "back to index" link in their footer.
+
 ## URLs
 
 Namespaced by numeric user ID, not username:
 
-- `/u/{user-id}/poet/{slug}/`
-- `/u/{user-id}/poem/{slug}/`
+- `/u/{user-id}/poets/` — alphabetical index of the user's poets (poem count each)
+- `/u/{user-id}/poems/` — alphabetical index of the user's poems (linked poet + date added)
+- `/u/{user-id}/poet/{slug}/` — single poet
+- `/u/{user-id}/poem/{slug}/` — single poem
 
-User ID rather than username so URLs stay stable across username changes. Implemented via WordPress rewrite rules; not yet built (see MVP plan in handoff).
+`/poets/` and `/poems/` are shortcuts that redirect to the viewer's own namespace (logged-out visitors → user 1). Legacy default-CPT single and archive URLs 301-redirect to the namespaced form. The two indexes cross-link to each other in their headers.
+
+User ID rather than username so URLs stay stable across username changes. Implemented via WordPress rewrite rules in `Rewrites`. The index page date uses the site's configured date format (Settings → General).
 
 ## Taxonomy
 
