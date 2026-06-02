@@ -77,6 +77,18 @@ Meta fields (`poet_id`, `source`, `external_links`) are edited via **classic PHP
 
 Future direction: replace meta boxes with React-based Gutenberg sidebar panels (`PluginDocumentSettingPanel`), which requires registering meta with `show_in_rest` and adding a JS build. Not blocking — pursue when a richer meta UX is wanted.
 
+## Templates
+
+**Single poem/poet pages render through the active theme**, not a plugin template. The plugin provides no `single-md_poem.php`/`single-md_poet.php`; the theme's own single template handles the page (title, chrome, layout), so the pages look native — this matters most on block (FSE) themes, where a classic plugin template would otherwise miss the theme's header/footer chrome and constrained-layout width.
+
+The plugin's bespoke markup is injected into `the_content` instead:
+- `Poems\PoemContent` prepends the byline and appends tags, the author-only notice, and the back-link.
+- `Poets\PoetContent` prepends the photo and appends external links, the poem list, aggregated tag counts, and the back-link.
+
+Both run at `the_content` priority 30 (after `PoemVisibility` at 20, so the body is already the author-or-public version) and are guarded to `is_singular() && in_the_loop() && is_main_query()` — so the markup never leaks into feeds, the REST API, the block editor, or archive loops.
+
+**The index pages** (`/u/{id}/poems/`, `/u/{id}/poets/`) have no underlying post, so they can't ride a theme single template. They use plugin templates (`archive-poems.php`, `archive-poets.php`, routed by `Templates::filter_template_include`; theme-overridable by filename or under `md-poetry/`). Their content is wrapped in a `wp-block-group is-layout-constrained` group so block themes apply content width, but they still use `get_header()`/`get_footer()`, which fall back to plainer theme-compat chrome on block themes. Making the index pages render with full native chrome is part of the deferred block-theme work below.
+
 ## Deliberately deferred
 
 The following are *not* decided. "We chose not to decide yet" is itself the current design state — revisit when there's real pressure to do so.
@@ -84,6 +96,7 @@ The following are *not* decided. "We chose not to decide yet" is itself the curr
 - **Books / collections as a first-class entity.** Source is a freeform string. If "all poems I've logged from *Ariel*" becomes a real desire, introduce a book/collection model and migrate source strings into structured records.
 - **Poet sharing model.** Locked to per-user. If this ever flips to shared, plan a migration: poets gain a canonical record, user-specific annotations move into a separate per-user layer.
 - **Repeatable meta field UI** for `external_links`: custom code vs. ACF/Meta Box/CMB2. Decide at implementation time.
+- **Block-theme-native index pages.** Single pages already render natively through the theme (see Templates). The custom index routes still use plugin PHP templates with plainer theme-compat chrome on block themes. Full native rendering for them — registering block templates and/or server-rendered blocks — is a later effort, worth it when Site-Editor customisation is wanted.
 - **Discovery / homepage.** What should someone landing on the plugin's root URL see? Not designed.
 - **Public archive and search.** Defaults for now. Revisit when the collection is large enough that defaults stop being useful.
 - **Chapbook builder.** User-assembled lists of poems with a page-limit constraint, rendered through a printable template that folds into a zine (canonical layout: 8-page A4 imposition, but worth exploring others). Considerations to settle at implementation time: whether lists are private or shareable; how to surface public-domain vs in-copyright status per poem so the user knows what's safe to include (UK rule: author died ≤ 1955 → public domain).

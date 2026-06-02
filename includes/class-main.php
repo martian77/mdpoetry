@@ -10,8 +10,10 @@
 namespace MDPoetry;
 
 use MDPoetry\Admin\AdminSettings;
+use MDPoetry\Poems\PoemContent;
 use MDPoetry\Poems\PoemMetaBoxes;
 use MDPoetry\Poems\PoemVisibility;
+use MDPoetry\Poets\PoetContent;
 use MDPoetry\Poets\PoetMetaBoxes;
 use MDPoetry\Rewrites;
 
@@ -71,10 +73,15 @@ class Main {
 		// Copyright-safe visibility filter on poem content.
 		PoemVisibility::setup();
 
+		// Single poem/poet pages render through the theme; these inject the
+		// plugin's bespoke markup into the_content (byline, links, lists, etc.).
+		PoemContent::setup();
+		PoetContent::setup();
+
 		// Namespaced URLs (/u/{id}/...) and the /poets/ shortcut.
 		Rewrites::setup();
 
-		// Plugin-provided single templates (theme can still override).
+		// Plugin-provided archive templates (theme can still override).
 		Templates::setup();
 
 		// Flush rewrites once per version bump so namespaced URLs resolve
@@ -104,7 +111,7 @@ class Main {
 		$this->define( 'MDP_PLUGIN_SHORTNAME', 'mdpoetry' );
 		$this->define( 'MDP_ABSPATH', dirname( MDP_PLUGIN_FILE ) . '/' );
 		$this->define( 'MDP_TEMPLATE_PATH', 'md-poetry' );
-		$this->define( 'MDP_VERSION', '0.0.8' );
+		$this->define( 'MDP_VERSION', '0.1.0' );
 	}
 
 	/**

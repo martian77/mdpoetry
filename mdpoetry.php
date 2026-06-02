@@ -3,7 +3,7 @@
 Plugin Name: MartianDaze Poetry
 Plugin URI:  https://martiandaze.net
 Description: A poetry store for semi-private use
-Version:     0.0.8
+Version:     0.1.0
 Author:      Eleanor Martin
 Author URI:  https://martiandaze.net/about
 
