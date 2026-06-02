@@ -57,7 +57,7 @@ Namespaced by numeric user ID, not username:
 - `/u/{user-id}/poet/{slug}/` — single poet
 - `/u/{user-id}/poem/{slug}/` — single poem
 
-`/poets/` and `/poems/` are shortcuts that redirect to the viewer's own namespace (logged-out visitors → user 1). Legacy default-CPT single and archive URLs 301-redirect to the namespaced form. The two indexes cross-link to each other in their headers.
+`/poets/` and `/poems/` are shortcuts that redirect to the logged-in viewer's own namespace. Logged-out visitors get a 404 — the index is personalised to a viewer, so with no one logged in there is no index to show and we don't guess a user. Legacy default-CPT single and archive URLs 301-redirect to the namespaced form. The two indexes cross-link to each other in their headers.
 
 User ID rather than username so URLs stay stable across username changes. Implemented via WordPress rewrite rules in `Rewrites`. The index page date uses the site's configured date format (Settings → General).
 

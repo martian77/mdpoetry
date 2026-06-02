@@ -216,8 +216,8 @@ class Rewrites {
 	 * /poets/ and /poems/ shortcuts: redirect to /u/{viewer-id}/{archive}/.
 	 *
 	 * - Logged-in user -> their own namespace.
-	 * - Logged-out visitor -> user 1 (site owner; works for the single-user
-	 *   install today, revisit when multi-user is enabled).
+	 * - Logged-out visitor -> 404. The index is personalised to a viewer; with
+	 *   no one logged in there is no index to show, so we don't guess a user.
 	 */
 	public function redirect_shortcut() {
 		$archive = get_query_var( self::QV_ARCHIVE );
@@ -229,7 +229,11 @@ class Rewrites {
 		}
 		$target = get_current_user_id();
 		if ( $target <= 0 ) {
-			$target = 1;
+			global $wp_query;
+			$wp_query->set_404();
+			status_header( 404 );
+			nocache_headers();
+			return;
 		}
 		wp_safe_redirect( home_url( sprintf( '/u/%d/%s/', $target, $archive ) ), 302 );
 		exit;
