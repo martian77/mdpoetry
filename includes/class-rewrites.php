@@ -4,9 +4,11 @@
  *
  * Implements the URL design from the v0 handoff:
  *   - /u/{user-id}/poets/              (personalised poets index)
+ *   - /u/{user-id}/poems/             (personalised poems index)
  *   - /u/{user-id}/poet/{slug}/        (single poet)
  *   - /u/{user-id}/poem/{slug}/        (single poem)
  *   - /poets/                          (shortcut: redirects to the viewer's namespace)
+ *   - /poems/                          (shortcut: redirects to the viewer's namespace)
  *
  * Also 301-redirects the legacy default-archive URLs so links stay clean.
  *
@@ -31,6 +33,7 @@ class Rewrites {
 	public const QV_USER_ID  = 'mdp_user_id';
 	public const QV_ARCHIVE  = 'mdp_archive';
 	public const ARCHIVE_POETS = 'poets';
+	public const ARCHIVE_POEMS = 'poems';
 
 	/**
 	 * Wires up hooks.
@@ -47,6 +50,7 @@ class Rewrites {
 		add_filter( 'post_type_link', array( $self, 'filter_permalink' ), 10, 2 );
 		add_filter( 'redirect_canonical', array( $self, 'suppress_canonical_for_namespaced' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $self, 'pre_get_posts' ) );
+		add_action( 'template_redirect', array( $self, 'maybe_404_unknown_user' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_shortcut' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_singular_poet_to_archive' ) );
 		add_action( 'template_redirect', array( $self, 'redirect_legacy_singles' ) );
@@ -77,6 +81,12 @@ class Rewrites {
 			'index.php?' . self::QV_USER_ID . '=$matches[1]&' . self::QV_ARCHIVE . '=' . self::ARCHIVE_POETS,
 			'top'
 		);
+		// /u/{id}/poems/ -> poems archive for that user.
+		add_rewrite_rule(
+			'^u/([0-9]+)/poems/?$',
+			'index.php?' . self::QV_USER_ID . '=$matches[1]&' . self::QV_ARCHIVE . '=' . self::ARCHIVE_POEMS,
+			'top'
+		);
 		// /u/{id}/poet/{slug}/ -> single poet, namespaced.
 		add_rewrite_rule(
 			'^u/([0-9]+)/poet/([^/]+)/?$',
@@ -93,6 +103,12 @@ class Rewrites {
 		add_rewrite_rule(
 			'^poets/?$',
 			'index.php?' . self::QV_ARCHIVE . '=' . self::ARCHIVE_POETS,
+			'top'
+		);
+		// /poems/ shortcut -> redirected on template_redirect.
+		add_rewrite_rule(
+			'^poems/?$',
+			'index.php?' . self::QV_ARCHIVE . '=' . self::ARCHIVE_POEMS,
 			'top'
 		);
 	}
@@ -172,14 +188,40 @@ class Rewrites {
 	}
 
 	/**
-	 * /poets/ shortcut: redirects to /u/{viewer-id}/poets/.
+	 * 404s an archive request for a user-id that doesn't exist.
+	 *
+	 * Runs on template_redirect (after the main query and core's own
+	 * handle_404), so the flag survives, and before template selection — which
+	 * means WordPress then resolves its normal 404 template, whether the active
+	 * theme is classic (404.php) or block (404 HTML template). The archive
+	 * templates must not render their own 404, since that only works for classic
+	 * themes.
+	 */
+	public function maybe_404_unknown_user() {
+		$archive = get_query_var( self::QV_ARCHIVE );
+		if ( self::ARCHIVE_POETS !== $archive && self::ARCHIVE_POEMS !== $archive ) {
+			return;
+		}
+		$user_id = (int) get_query_var( self::QV_USER_ID );
+		if ( $user_id <= 0 || get_user_by( 'ID', $user_id ) ) {
+			return;
+		}
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
+	}
+
+	/**
+	 * /poets/ and /poems/ shortcuts: redirect to /u/{viewer-id}/{archive}/.
 	 *
 	 * - Logged-in user -> their own namespace.
 	 * - Logged-out visitor -> user 1 (site owner; works for the single-user
 	 *   install today, revisit when multi-user is enabled).
 	 */
 	public function redirect_shortcut() {
-		if ( self::ARCHIVE_POETS !== get_query_var( self::QV_ARCHIVE ) ) {
+		$archive = get_query_var( self::QV_ARCHIVE );
+		if ( self::ARCHIVE_POETS !== $archive && self::ARCHIVE_POEMS !== $archive ) {
 			return;
 		}
 		if ( (int) get_query_var( self::QV_USER_ID ) > 0 ) {
@@ -189,7 +231,7 @@ class Rewrites {
 		if ( $target <= 0 ) {
 			$target = 1;
 		}
-		wp_safe_redirect( home_url( sprintf( '/u/%d/poets/', $target ) ), 302 );
+		wp_safe_redirect( home_url( sprintf( '/u/%d/%s/', $target, $archive ) ), 302 );
 		exit;
 	}
 
@@ -230,15 +272,19 @@ class Rewrites {
 	}
 
 	/**
-	 * 301-redirects the legacy /md_poet/ post-type archive to the /poets/
-	 * shortcut, which then redirects to the viewer's namespaced index.
+	 * 301-redirects the legacy /md_poet/ and /md_poem/ post-type archives to
+	 * the /poets/ and /poems/ shortcuts, which then redirect to the viewer's
+	 * namespaced index.
 	 */
 	public function redirect_legacy_archive() {
-		if ( ! is_post_type_archive( PostTypes::POST_TYPE_POET ) ) {
-			return;
+		if ( is_post_type_archive( PostTypes::POST_TYPE_POET ) ) {
+			wp_safe_redirect( home_url( '/poets/' ), 301 );
+			exit;
 		}
-		wp_safe_redirect( home_url( '/poets/' ), 301 );
-		exit;
+		if ( is_post_type_archive( PostTypes::POST_TYPE_POEM ) ) {
+			wp_safe_redirect( home_url( '/poems/' ), 301 );
+			exit;
+		}
 	}
 
 	/**

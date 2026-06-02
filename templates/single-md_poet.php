@@ -159,6 +159,16 @@ get_header();
 					</ul>
 				</section>
 			<?php endif; ?>
+
+			<?php if ( $author_id > 0 ) : ?>
+				<footer class="mdp-poet__footer">
+					<p class="mdp-poet__back">
+						<a href="<?php echo esc_url( home_url( sprintf( '/u/%d/poets/', $author_id ) ) ); ?>">
+							<?php esc_html_e( '← All poets', 'mdpoetry-plugin' ); ?>
+						</a>
+					</p>
+				</footer>
+			<?php endif; ?>
 		</article>
 		<?php
 	endwhile;

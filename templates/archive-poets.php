@@ -27,11 +27,8 @@ if ( $user_id <= 0 ) {
 
 $user = get_user_by( 'ID', $user_id );
 if ( ! $user ) {
-	global $wp_query;
-	$wp_query->set_404();
-	status_header( 404 );
-	nocache_headers();
-	get_template_part( '404' );
+	// Unknown users are 404'd before template selection (see
+	// Rewrites::maybe_404_unknown_user); bail defensively.
 	return;
 }
 
@@ -70,6 +67,11 @@ get_header();
 				?>
 			</p>
 		<?php endif; ?>
+		<p class="mdp-poets-archive__nav">
+			<a href="<?php echo esc_url( home_url( sprintf( '/u/%d/poems/', $user_id ) ) ); ?>">
+				<?php esc_html_e( 'View poems →', 'mdpoetry-plugin' ); ?>
+			</a>
+		</p>
 	</header>
 
 	<?php if ( empty( $poets ) ) : ?>
