@@ -81,7 +81,7 @@ class PoemContent {
 	 * @return string
 	 */
 	private static function footer( $post ) {
-		$html = '';
+		$html = self::source( $post );
 
 		$tag_list = get_the_term_list( $post->ID, PostTypes::TAXONOMY_POEM_TAGS, '', ', ', '' );
 		if ( $tag_list && ! is_wp_error( $tag_list ) ) {
@@ -110,5 +110,25 @@ class PoemContent {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Renders the source line, if set. Shown to everyone (author included) —
+	 * it's attribution, not copyrighted text. A URL is linkified.
+	 *
+	 * @param  \WP_Post $post The poem.
+	 * @return string
+	 */
+	private static function source( $post ) {
+		$source = (string) get_post_meta( $post->ID, PoemMetaBoxes::META_SOURCE, true );
+		if ( '' === $source ) {
+			return '';
+		}
+		$rendered = filter_var( $source, FILTER_VALIDATE_URL )
+			? '<a href="' . esc_url( $source ) . '" rel="noopener noreferrer">' . esc_html( $source ) . '</a>'
+			: esc_html( $source );
+		return '<p class="mdp-poem-source"><em>'
+			. esc_html__( 'Source:', 'mdpoetry-plugin' )
+			. '</em> ' . $rendered . '</p>';
 	}
 }

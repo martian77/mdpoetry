@@ -42,7 +42,7 @@ The excerpt must be derived from block-aware content: strip block-comment marker
 - alphabetical list of poems (titles linking to single-poem pages)
 - list of tags used across that poet's poems with per-tag usage counts (e.g. "grief (4), nature (2)")
 
-The author, when viewing their own poem, sees full body. Everyone else sees first line + source.
+The author, when viewing their own poem, sees full body; everyone else sees first line + hidden-line count. The source (attribution) is shown to everyone, author included.
 
 **The poems index** (`/u/{user-id}/poems/`) lists titles linking to single-poem pages; the visibility filter still governs what's visible on each poem page, so non-authors get first line + source there as on poet pages. Single poem and poet pages each carry a "back to index" link in their footer.
 
@@ -82,7 +82,7 @@ Future direction: replace meta boxes with React-based Gutenberg sidebar panels (
 **Single poem/poet pages render through the active theme**, not a plugin template. The plugin provides no `single-md_poem.php`/`single-md_poet.php`; the theme's own single template handles the page (title, chrome, layout), so the pages look native — this matters most on block (FSE) themes, where a classic plugin template would otherwise miss the theme's header/footer chrome and constrained-layout width.
 
 The plugin's bespoke markup is injected into `the_content` instead:
-- `Poems\PoemContent` prepends the byline and appends tags, the author-only notice, and the back-link.
+- `Poems\PoemContent` prepends the byline and appends the source, tags, the author-only notice, and the back-link. The source shows for everyone (author included) — it's attribution, not copyrighted text.
 - `Poets\PoetContent` appends external links, the poem list, aggregated tag counts, and the back-link. (The featured-image photo is left to the theme's single template, which already renders it.)
 
 Both run at `the_content` priority 30 (after `PoemVisibility` at 20, so the body is already the author-or-public version) and are guarded to `is_singular() && in_the_loop() && is_main_query()` — so the markup never leaks into feeds, the REST API, the block editor, or archive loops.

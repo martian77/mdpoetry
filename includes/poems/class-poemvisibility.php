@@ -92,7 +92,10 @@ class PoemVisibility {
 	}
 
 	/**
-	 * Renders the public (non-author) view: first line + source.
+	 * Renders the public (non-author) view: first line + hidden-line count.
+	 *
+	 * The source is not shown here — it's attribution (not copyrighted text)
+	 * and is rendered for everyone, author included, by PoemContent.
 	 *
 	 * @param \WP_Post $post The poem post.
 	 * @return string HTML.
@@ -101,9 +104,8 @@ class PoemVisibility {
 		$excerpt    = Poem::compute_excerpt( $post->post_content );
 		$total      = Poem::count_lines( $post->post_content );
 		$more_lines = max( 0, $total - 1 );
-		$source     = (string) get_post_meta( $post->ID, PoemMetaBoxes::META_SOURCE, true );
 
-		$html  = '<div class="mdp-poem-public">';
+		$html = '<div class="mdp-poem-public">';
 		if ( '' !== $excerpt ) {
 			$html .= '<p class="mdp-poem-first-line">' . esc_html( $excerpt ) . '…</p>';
 			if ( $more_lines > 0 ) {
@@ -118,29 +120,7 @@ class PoemVisibility {
 					. '</p>';
 			}
 		}
-		if ( '' !== $source ) {
-			$html .= '<p class="mdp-poem-source"><em>'
-				. esc_html__( 'Source:', 'mdpoetry-plugin' )
-				. '</em> '
-				. self::format_source( $source )
-				. '</p>';
-		}
 		$html .= '</div>';
 		return $html;
-	}
-
-	/**
-	 * Linkifies a source string if it looks like a URL, otherwise escapes it.
-	 *
-	 * @param string $source Raw source string.
-	 * @return string HTML-safe rendered source.
-	 */
-	private static function format_source( $source ) {
-		if ( filter_var( $source, FILTER_VALIDATE_URL ) ) {
-			return '<a href="' . esc_url( $source ) . '" rel="noopener noreferrer">'
-				. esc_html( $source )
-				. '</a>';
-		}
-		return esc_html( $source );
 	}
 }
