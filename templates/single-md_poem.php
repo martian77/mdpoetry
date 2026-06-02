@@ -9,6 +9,7 @@
  */
 
 use MDPoetry\PostTypes;
+use MDPoetry\Poems\Poem;
 use MDPoetry\Poems\PoemMetaBoxes;
 use MDPoetry\Poems\PoemVisibility;
 
@@ -27,6 +28,9 @@ get_header();
 		$poet_id        = (int) get_post_meta( $poem_id, PoemMetaBoxes::META_POET_ID, true );
 		$poet           = $poet_id ? get_post( $poet_id ) : null;
 		$viewer_is_author = PoemVisibility::viewer_is_author( get_post() );
+		// Lines hidden from non-authors. A single-line poem hides nothing —
+		// the public view already shows the whole thing — so no notice below.
+		$hidden_lines = max( 0, Poem::count_lines( get_post_field( 'post_content', $poem_id ) ) - 1 );
 		?>
 		<article id="post-<?php the_ID(); ?>" <?php post_class( 'mdp-poem' ); ?>>
 			<header class="mdp-poem__header">
@@ -56,7 +60,7 @@ get_header();
 					</p>
 				<?php endif; ?>
 
-				<?php if ( ! $viewer_is_author ) : ?>
+				<?php if ( ! $viewer_is_author && $hidden_lines > 0 ) : ?>
 					<p class="mdp-poem__notice">
 						<small>
 							<?php esc_html_e( 'Only the author can view the full text of this poem.', 'mdpoetry-plugin' ); ?>
