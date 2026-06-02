@@ -34,7 +34,7 @@ The excerpt must be derived from block-aware content: strip block-comment marker
 
 **Per-user data.** Poets are not shared across users. User A's "Sylvia Plath" and User B's "Sylvia Plath" are distinct records. Rationale: shared records make editing ambiguous (whose bio wins?); per-user keeps the model simple at the cost of duplication.
 
-**Poem visibility filter.** A `the_content` filter on `md_poem` returns the full body when `get_post_field('post_author', $post) === get_current_user_id()`, otherwise returns excerpt + source. Same code path for single- and multi-user; in a single-user install every poem is yours, so it behaves transparently.
+**Poem visibility filter.** A `the_content` filter on `md_poem` returns the full body when `get_post_field('post_author', $post) === get_current_user_id()`, otherwise returns the first line + hidden-line count. Same code path for single- and multi-user; in a single-user install every poem is yours, so it behaves transparently. As fail-closed hardening, a `get_the_excerpt` filter always recomputes a poem's excerpt from the body (first line only) rather than trusting the stored `post_excerpt`, and non-authored poems are excluded from front-end search (`posts_where`) — so the body never leaks via an empty excerpt or a search match.
 
 **Poet pages are public**, with the same visibility filter applied to the poem list shown on them. Visitors see:
 - bio, photo, external links (the author's own writing — not copyrighted)

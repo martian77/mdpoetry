@@ -32,7 +32,31 @@ class PoemVisibility {
 	public static function setup() {
 		$self = new self();
 		add_filter( 'the_content', array( $self, 'filter_content' ), 20 );
+		add_filter( 'get_the_excerpt', array( $self, 'filter_excerpt' ), 20, 2 );
 		add_filter( 'posts_where', array( $self, 'filter_search_where' ), 10, 2 );
+	}
+
+	/**
+	 * Forces a poem's excerpt to the computed first line.
+	 *
+	 * Fail-closed hardening: the body is private, so a poem must never expose
+	 * more than its first line via an excerpt. Relying on the stored
+	 * `post_excerpt` is fail-open — if it's ever empty (un-computed, cleared,
+	 * imported), WordPress auto-generates the excerpt from the full body, which
+	 * would surface hidden text in search results and anywhere `the_excerpt()`
+	 * is used. We always recompute from the body instead. Non-poem excerpts are
+	 * untouched.
+	 *
+	 * @param  string           $excerpt The post excerpt.
+	 * @param  \WP_Post|int|null $post    The post (older WP omits this).
+	 * @return string
+	 */
+	public function filter_excerpt( $excerpt, $post = null ) {
+		$post = $post ? get_post( $post ) : get_post();
+		if ( ! $post || PostTypes::POST_TYPE_POEM !== $post->post_type ) {
+			return $excerpt;
+		}
+		return Poem::compute_excerpt( $post->post_content );
 	}
 
 	/**
