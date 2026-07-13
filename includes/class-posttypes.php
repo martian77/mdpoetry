@@ -43,10 +43,15 @@ class PostTypes {
 				'name'          => __( 'Poems', 'mdpoetry-plugin' ),
 				'singular_name' => __( 'Poem', 'mdpoetry-plugin' ),
 			),
-			'public'       => true,
-			'has_archive'  => true,
-			'show_in_rest' => true,
-			'supports'     => array( 'title', 'editor', 'author' ),
+			'public'        => true,
+			'has_archive'   => true,
+			'show_in_rest'  => true,
+			'supports'      => array( 'title', 'editor', 'author' ),
+			// Suggest the Verse block for new poems; authors can remove or add others.
+			'template'      => array(
+				array( 'core/verse' ),
+			),
+			'template_lock' => false,
 		);
 		register_post_type( self::POST_TYPE_POEM, $poem );
 
