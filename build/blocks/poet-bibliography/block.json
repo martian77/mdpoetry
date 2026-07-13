@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "mdpoetry/poet-bibliography",
+  "title": "Poet Bibliography",
+  "category": "widgets",
+  "description": "Poem count and alphabetical list of poems by this poet.",
+  "textdomain": "mdpoetry-plugin",
+  "usesContext": [
+    "postId"
+  ],
+  "supports": {
+    "html": false,
+    "multiple": false
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

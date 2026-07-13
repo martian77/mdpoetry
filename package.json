@@ -1,0 +1,13 @@
+{
+  "name": "mdpoetry",
+  "version": "0.0.9",
+  "private": true,
+  "description": "Block build for the MDPoetry WordPress plugin.",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

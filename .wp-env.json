@@ -1,0 +1,9 @@
+{
+  "core": null,
+  "phpVersion": "8.2",
+  "plugins": ["."],
+  "themes": ["https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"],
+  "config": {
+    "WP_DEBUG": true
+  }
+}

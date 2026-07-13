@@ -74,6 +74,9 @@ class Main {
 		// Namespaced URLs (/u/{id}/...) and the /poets/ shortcut.
 		Rewrites::setup();
 
+		// Custom blocks used by the block-theme templates.
+		Blocks::setup();
+
 		// Plugin-provided single templates (theme can still override).
 		Templates::setup();
 
@@ -104,7 +107,7 @@ class Main {
 		$this->define( 'MDP_PLUGIN_SHORTNAME', 'mdpoetry' );
 		$this->define( 'MDP_ABSPATH', dirname( MDP_PLUGIN_FILE ) . '/' );
 		$this->define( 'MDP_TEMPLATE_PATH', 'md-poetry' );
-		$this->define( 'MDP_VERSION', '0.0.8' );
+		$this->define( 'MDP_VERSION', '0.0.9' );
 	}
 
 	/**

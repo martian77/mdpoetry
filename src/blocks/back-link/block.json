@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "mdpoetry/back-link",
+	"title": "Poetry Back Link",
+	"category": "widgets",
+	"description": "Link back to the poems or poets index for a user.",
+	"textdomain": "mdpoetry-plugin",
+	"usesContext": [ "postId" ],
+	"attributes": {
+		"indexType": {
+			"type": "string",
+			"enum": [ "poems", "poets" ],
+			"default": "poems"
+		},
+		"userId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": true
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

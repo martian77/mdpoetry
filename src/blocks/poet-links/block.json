@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "mdpoetry/poet-links",
+	"title": "Poet External Links",
+	"category": "widgets",
+	"description": "The poet's external links (Wikipedia, Poetry Foundation, personal site, etc.).",
+	"textdomain": "mdpoetry-plugin",
+	"usesContext": [ "postId" ],
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

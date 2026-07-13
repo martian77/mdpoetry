@@ -1,0 +1,32 @@
+<!-- wp:template-part {"slug":"header","tagName":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","className":"mdp-single-poem","layout":{"type":"constrained"}} -->
+<main class="wp-block-group mdp-single-poem">
+
+	<!-- wp:group {"tagName":"article","className":"mdp-poem"} -->
+	<article class="wp-block-group mdp-poem">
+
+		<!-- wp:group {"tagName":"header","className":"mdp-poem__header"} -->
+		<header class="wp-block-group mdp-poem__header">
+			<!-- wp:post-title {"level":1,"isLink":false} /-->
+			<!-- wp:mdpoetry/poem-byline /-->
+		</header>
+		<!-- /wp:group -->
+
+		<!-- wp:post-content {"className":"mdp-poem__content"} /-->
+
+		<!-- wp:group {"tagName":"footer","className":"mdp-poem__footer"} -->
+		<footer class="wp-block-group mdp-poem__footer">
+			<!-- wp:post-terms {"term":"poem_tags","className":"mdp-poem__tags"} /-->
+			<!-- wp:mdpoetry/poem-visibility-notice /-->
+			<!-- wp:mdpoetry/back-link {"indexType":"poems"} /-->
+		</footer>
+		<!-- /wp:group -->
+
+	</article>
+	<!-- /wp:group -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer","area":"footer"} /-->
