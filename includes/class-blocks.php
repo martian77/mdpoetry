@@ -42,6 +42,8 @@ class Blocks {
 		$build_dir = MDP_ABSPATH . 'build/blocks';
 		$folders   = glob( $build_dir . '/*', GLOB_ONLYDIR );
 		if ( ! $folders ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( 'MDPoetry: no built blocks found in ' . $build_dir . ' — run `npm run build`.' );
 			return;
 		}
 		foreach ( $folders as $folder ) {

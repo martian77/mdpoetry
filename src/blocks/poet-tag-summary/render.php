@@ -28,6 +28,7 @@ $poems = get_posts(
 		'post_type'      => PostTypes::POST_TYPE_POEM,
 		'posts_per_page' => -1,
 		'author'         => $author_id,
+		'post_status'    => array( 'publish', 'private' ),
 		'fields'         => 'ids',
 		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(

@@ -44,29 +44,47 @@ class Templates {
 	 * the Site Editor still wins over these defaults.
 	 */
 	public static function register_block_templates() {
-		if ( ! wp_is_block_theme() ) {
+		if ( ! wp_is_block_theme() || ! function_exists( 'register_block_template' ) ) {
 			return;
 		}
 
-		register_block_template(
+		self::register_block_template_from_file(
 			MDP_PLUGIN_SHORTNAME . '//single-' . PostTypes::POST_TYPE_POEM,
+			'single-md_poem.html',
 			array(
 				'title'       => __( 'Single Poem', 'mdpoetry-plugin' ),
 				'description' => __( 'Displays a single poem, with the visibility filter applied to its body.', 'mdpoetry-plugin' ),
-				'content'     => (string) file_get_contents( MDP_ABSPATH . 'templates/block-templates/single-md_poem.html' ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
 				'post_types'  => array( PostTypes::POST_TYPE_POEM ),
 			)
 		);
 
-		register_block_template(
+		self::register_block_template_from_file(
 			MDP_PLUGIN_SHORTNAME . '//single-' . PostTypes::POST_TYPE_POET,
+			'single-md_poet.html',
 			array(
 				'title'       => __( 'Single Poet', 'mdpoetry-plugin' ),
 				'description' => __( "Displays a poet's bio, photo, links, and bibliography.", 'mdpoetry-plugin' ),
-				'content'     => (string) file_get_contents( MDP_ABSPATH . 'templates/block-templates/single-md_poet.html' ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
 				'post_types'  => array( PostTypes::POST_TYPE_POET ),
 			)
 		);
+	}
+
+	/**
+	 * Registers a block template, reading its markup from a file under
+	 * `templates/block-templates/`.
+	 *
+	 * @param  string $slug     Template slug (passed to `register_block_template()`).
+	 * @param  string $filename Bare filename under `templates/block-templates/`.
+	 * @param  array  $args     Remaining `register_block_template()` args (without `content`).
+	 */
+	private static function register_block_template_from_file( $slug, $filename, $args ) {
+		$path = MDP_ABSPATH . 'templates/block-templates/' . $filename;
+		if ( ! file_exists( $path ) ) {
+			return;
+		}
+
+		$args['content'] = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+		register_block_template( $slug, $args );
 	}
 
 	/**

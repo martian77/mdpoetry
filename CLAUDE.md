@@ -87,7 +87,7 @@ Poets are **not shared** across users. Each WP user has their own poet records. 
 | `md_poem` | `poet_id` | `PoemMetaBoxes::META_POET_ID` |
 | `md_poem` | `source` | `PoemMetaBoxes::META_SOURCE` |
 
-`external_links` on `md_poet` is noted in the design doc as not yet implemented.
+`external_links` on `md_poet` is edited via a repeatable meta box (`PoetMetaBoxes::META_LINKS`) and rendered on block themes by the `poet-links` block.
 
 ### Key constants
 

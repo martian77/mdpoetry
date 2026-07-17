@@ -32,6 +32,7 @@ $poems = get_posts(
 		'orderby'        => 'title',
 		'order'          => 'ASC',
 		'author'         => $author_id,
+		'post_status'    => array( 'publish', 'private' ),
 		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			array(
 				'key'     => PoemMetaBoxes::META_POET_ID,
