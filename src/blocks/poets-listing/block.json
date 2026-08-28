@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "mdpoetry/poets-listing",
+	"title": "Poets Listing",
+	"category": "widgets",
+	"description": "The full body of a user's namespaced poets index (/u/{id}/poets/).",
+	"textdomain": "mdpoetry-plugin",
+	"attributes": {
+		"userId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

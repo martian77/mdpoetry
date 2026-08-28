@@ -77,6 +77,19 @@ Meta fields (`poet_id`, `source`, `external_links`) are edited via **classic PHP
 
 Future direction: replace meta boxes with React-based Gutenberg sidebar panels (`PluginDocumentSettingPanel`), which requires registering meta with `show_in_rest` and adding a JS build. Not blocking — pursue when a richer meta UX is wanted.
 
+## Rendering: classic vs. block themes
+
+Chosen per-request by `wp_is_block_theme()`.
+
+**Classic themes** render via plugin-provided PHP templates (`templates/single-md_poem.php` etc.) that call `get_header()`/`get_footer()` — unchanged since v0.
+
+**Block themes** don't ship `header.php`/`footer.php`, so `get_header()`/`get_footer()` would silently fall back to WordPress's generic default markup rather than the theme's real header/footer. Instead:
+
+- `single-md_poem`/`single-md_poet` are registered as default block templates via `register_block_template()` (WP 6.7+ — this is the version floor). Composed of core blocks (title, content, featured image, terms) plus small custom dynamic blocks (`mdpoetry/poem-byline`, `poem-visibility-notice`, `poet-links`, `poet-bibliography`, `poet-tag-summary`, `back-link`) for the bespoke bits. A theme can still override either template in the Site Editor — the plugin default is only a fallback, same as core intends.
+- `/u/{id}/poems/` and `/u/{id}/poets/` are virtual pages (not real archive queries — see URLs below), so they can't hook that same fallback. They render their own page shell instead, using the theme's actual header/footer template parts (`block_header_area()`/`block_footer_area()`) around a real block-rendered body (`mdpoetry/poems-listing`/`poets-listing`), so they still inherit the theme's global styles rather than being raw hand-written HTML in a shim.
+
+The custom blocks are server-rendered (block.json's `render` field) with a thin `ServerSideRender`-based `edit()` so they preview correctly in the Site Editor. Building them requires `npm run build` (`@wordpress/scripts`) — see CLAUDE.md.
+
 ## Deliberately deferred
 
 The following are *not* decided. "We chose not to decide yet" is itself the current design state — revisit when there's real pressure to do so.

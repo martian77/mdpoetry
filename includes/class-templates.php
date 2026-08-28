@@ -29,16 +29,81 @@ class Templates {
 	public static function setup() {
 		add_filter( 'single_template', array( self::class, 'filter_single_template' ) );
 		add_filter( 'template_include', array( self::class, 'filter_template_include' ) );
+		// Called directly (not via add_action('init', ...)): Main::init() already
+		// runs inside WP's own `init` firing, and a callback added to a hook
+		// while that same priority is being iterated doesn't run this pass.
+		self::register_block_templates();
+	}
+
+	/**
+	 * Registers default block templates for `single-md_poem`/`single-md_poet`
+	 * on block themes.
+	 *
+	 * This hooks the same fallback resolution core already runs for block
+	 * themes (see `locate_block_template()`), so a theme-provided override in
+	 * the Site Editor still wins over these defaults.
+	 */
+	public static function register_block_templates() {
+		if ( ! wp_is_block_theme() || ! function_exists( 'register_block_template' ) ) {
+			return;
+		}
+
+		self::register_block_template_from_file(
+			MDP_PLUGIN_SHORTNAME . '//single-' . PostTypes::POST_TYPE_POEM,
+			'single-md_poem.html',
+			array(
+				'title'       => __( 'Single Poem', 'mdpoetry-plugin' ),
+				'description' => __( 'Displays a single poem, with the visibility filter applied to its body.', 'mdpoetry-plugin' ),
+				'post_types'  => array( PostTypes::POST_TYPE_POEM ),
+			)
+		);
+
+		self::register_block_template_from_file(
+			MDP_PLUGIN_SHORTNAME . '//single-' . PostTypes::POST_TYPE_POET,
+			'single-md_poet.html',
+			array(
+				'title'       => __( 'Single Poet', 'mdpoetry-plugin' ),
+				'description' => __( "Displays a poet's bio, photo, links, and bibliography.", 'mdpoetry-plugin' ),
+				'post_types'  => array( PostTypes::POST_TYPE_POET ),
+			)
+		);
+	}
+
+	/**
+	 * Registers a block template, reading its markup from a file under
+	 * `templates/block-templates/`.
+	 *
+	 * @param  string $slug     Template slug (passed to `register_block_template()`).
+	 * @param  string $filename Bare filename under `templates/block-templates/`.
+	 * @param  array  $args     Remaining `register_block_template()` args (without `content`).
+	 */
+	private static function register_block_template_from_file( $slug, $filename, $args ) {
+		$path = MDP_ABSPATH . 'templates/block-templates/' . $filename;
+		if ( ! file_exists( $path ) ) {
+			return;
+		}
+
+		$args['content'] = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+		register_block_template( $slug, $args );
 	}
 
 	/**
 	 * Routes single-CPT requests to plugin-provided templates if no theme
 	 * override is present.
 	 *
+	 * Block themes are left alone: `register_block_templates()` above wires
+	 * the plugin defaults into core's own block-template fallback resolution,
+	 * which runs later on this same filter and needs `$template` to still be
+	 * empty to do its job.
+	 *
 	 * @param  string $template Path chosen by core.
 	 * @return string
 	 */
 	public static function filter_single_template( $template ) {
+		if ( wp_is_block_theme() ) {
+			return $template;
+		}
+
 		$post = get_post();
 		if ( ! $post ) {
 			return $template;
@@ -57,6 +122,11 @@ class Templates {
 	 * Routes custom routes (the namespaced poets and poems archives) to their
 	 * template.
 	 *
+	 * These routes aren't real archive/singular queries (see `Rewrites`), so
+	 * core's block-template fallback never sees them — on a block theme this
+	 * routes to the block-rendering sibling templates instead of the classic
+	 * ones.
+	 *
 	 * @param  string $template Template path chosen by core.
 	 * @return string
 	 */
@@ -67,12 +137,13 @@ class Templates {
 			return $template;
 		}
 		if ( (int) get_query_var( Rewrites::QV_USER_ID ) > 0 ) {
-			$archive = get_query_var( Rewrites::QV_ARCHIVE );
-			$file    = null;
+			$archive     = get_query_var( Rewrites::QV_ARCHIVE );
+			$block_theme = wp_is_block_theme();
+			$file        = null;
 			if ( Rewrites::ARCHIVE_POETS === $archive ) {
-				$file = 'archive-poets.php';
+				$file = $block_theme ? 'archive-poets-block.php' : 'archive-poets.php';
 			} elseif ( Rewrites::ARCHIVE_POEMS === $archive ) {
-				$file = 'archive-poems.php';
+				$file = $block_theme ? 'archive-poems-block.php' : 'archive-poems.php';
 			}
 			if ( $file ) {
 				$located = self::locate( $file );

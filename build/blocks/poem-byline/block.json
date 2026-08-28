@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "mdpoetry/poem-byline",
+  "title": "Poem Byline",
+  "category": "widgets",
+  "description": "Shows \"by {poet}\" linking to the poet's page, for a single poem.",
+  "textdomain": "mdpoetry-plugin",
+  "usesContext": [
+    "postId"
+  ],
+  "supports": {
+    "html": false,
+    "multiple": false
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

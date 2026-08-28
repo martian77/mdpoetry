@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "mdpoetry/poems-listing",
+	"title": "Poems Listing",
+	"category": "widgets",
+	"description": "The full body of a user's namespaced poems index (/u/{id}/poems/).",
+	"textdomain": "mdpoetry-plugin",
+	"attributes": {
+		"userId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}
