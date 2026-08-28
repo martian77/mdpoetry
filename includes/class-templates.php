@@ -25,32 +25,15 @@ class Templates {
 
 	/**
 	 * Wires up the template filters.
+	 *
+	 * Note: single poem/poet pages are deliberately NOT given a plugin
+	 * template. They render through the active theme's own single template so
+	 * they inherit its chrome and layout (critical for block themes); the
+	 * plugin's bespoke markup is injected into `the_content` instead — see
+	 * PoemContent / PoetContent.
 	 */
 	public static function setup() {
-		add_filter( 'single_template', array( self::class, 'filter_single_template' ) );
 		add_filter( 'template_include', array( self::class, 'filter_template_include' ) );
-	}
-
-	/**
-	 * Routes single-CPT requests to plugin-provided templates if no theme
-	 * override is present.
-	 *
-	 * @param  string $template Path chosen by core.
-	 * @return string
-	 */
-	public static function filter_single_template( $template ) {
-		$post = get_post();
-		if ( ! $post ) {
-			return $template;
-		}
-
-		$type = $post->post_type;
-		if ( PostTypes::POST_TYPE_POEM !== $type && PostTypes::POST_TYPE_POET !== $type ) {
-			return $template;
-		}
-
-		$located = self::locate( 'single-' . $type . '.php' );
-		return $located ? $located : $template;
 	}
 
 	/**

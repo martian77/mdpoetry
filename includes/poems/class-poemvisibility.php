@@ -32,6 +32,59 @@ class PoemVisibility {
 	public static function setup() {
 		$self = new self();
 		add_filter( 'the_content', array( $self, 'filter_content' ), 20 );
+		add_filter( 'get_the_excerpt', array( $self, 'filter_excerpt' ), 20, 2 );
+		add_filter( 'posts_where', array( $self, 'filter_search_where' ), 10, 2 );
+	}
+
+	/**
+	 * Forces a poem's excerpt to the computed first line.
+	 *
+	 * Fail-closed hardening: the body is private, so a poem must never expose
+	 * more than its first line via an excerpt. Relying on the stored
+	 * `post_excerpt` is fail-open — if it's ever empty (un-computed, cleared,
+	 * imported), WordPress auto-generates the excerpt from the full body, which
+	 * would surface hidden text in search results and anywhere `the_excerpt()`
+	 * is used. We always recompute from the body instead. Non-poem excerpts are
+	 * untouched.
+	 *
+	 * @param  string           $excerpt The post excerpt.
+	 * @param  \WP_Post|int|null $post    The post (older WP omits this).
+	 * @return string
+	 */
+	public function filter_excerpt( $excerpt, $post = null ) {
+		$post = $post ? get_post( $post ) : get_post();
+		if ( ! $post || PostTypes::POST_TYPE_POEM !== $post->post_type ) {
+			return $excerpt;
+		}
+		return Poem::compute_excerpt( $post->post_content );
+	}
+
+	/**
+	 * Keeps poems you don't own out of front-end search results.
+	 *
+	 * `md_poem` is a public post type, so by default a non-author searching a
+	 * word that only appears in a hidden line would surface the poem — the body
+	 * isn't shown, but the match leaks that the content exists, undercutting the
+	 * "first line + source only" promise. We exclude `md_poem` rows not authored
+	 * by the current viewer (so your own poems stay findable when logged in)
+	 * rather than using the blunt `exclude_from_search`, which would hide them
+	 * from the author too. Other post types are untouched.
+	 *
+	 * @param  string    $where The WHERE clause of the query.
+	 * @param  \WP_Query $query The query being run.
+	 * @return string
+	 */
+	public function filter_search_where( $where, $query ) {
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+			return $where;
+		}
+		global $wpdb;
+		$where .= $wpdb->prepare(
+			" AND NOT ( {$wpdb->posts}.post_type = %s AND {$wpdb->posts}.post_author <> %d )",
+			PostTypes::POST_TYPE_POEM,
+			get_current_user_id()
+		);
+		return $where;
 	}
 
 	/**
@@ -63,7 +116,10 @@ class PoemVisibility {
 	}
 
 	/**
-	 * Renders the public (non-author) view: first line + source.
+	 * Renders the public (non-author) view: first line + hidden-line count.
+	 *
+	 * The source is not shown here — it's attribution (not copyrighted text)
+	 * and is rendered for everyone, author included, by PoemContent.
 	 *
 	 * @param \WP_Post $post The poem post.
 	 * @return string HTML.
@@ -72,9 +128,8 @@ class PoemVisibility {
 		$excerpt    = Poem::compute_excerpt( $post->post_content );
 		$total      = Poem::count_lines( $post->post_content );
 		$more_lines = max( 0, $total - 1 );
-		$source     = (string) get_post_meta( $post->ID, PoemMetaBoxes::META_SOURCE, true );
 
-		$html  = '<div class="mdp-poem-public">';
+		$html = '<div class="mdp-poem-public">';
 		if ( '' !== $excerpt ) {
 			$html .= '<p class="mdp-poem-first-line">' . esc_html( $excerpt ) . '…</p>';
 			if ( $more_lines > 0 ) {
@@ -89,29 +144,7 @@ class PoemVisibility {
 					. '</p>';
 			}
 		}
-		if ( '' !== $source ) {
-			$html .= '<p class="mdp-poem-source"><em>'
-				. esc_html__( 'Source:', 'mdpoetry-plugin' )
-				. '</em> '
-				. self::format_source( $source )
-				. '</p>';
-		}
 		$html .= '</div>';
 		return $html;
-	}
-
-	/**
-	 * Linkifies a source string if it looks like a URL, otherwise escapes it.
-	 *
-	 * @param string $source Raw source string.
-	 * @return string HTML-safe rendered source.
-	 */
-	private static function format_source( $source ) {
-		if ( filter_var( $source, FILTER_VALIDATE_URL ) ) {
-			return '<a href="' . esc_url( $source ) . '" rel="noopener noreferrer">'
-				. esc_html( $source )
-				. '</a>';
-		}
-		return esc_html( $source );
 	}
 }
